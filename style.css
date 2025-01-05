@@ -1,5 +1,7 @@
 body{
     font-family: 'Courier New', Courier, monospace;
+    background-color: black;
+    color: white;
 }
 .container{
     margin: 0;
@@ -11,4 +13,14 @@ body{
 }
 .content{
     width: 25%;
+}
+
+p{
+    color: gray;
+}
+
+.hidden-input{
+    position: absolute;
+      opacity: 0;
+      z-index: -1;
 }
