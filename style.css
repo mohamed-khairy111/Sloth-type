@@ -75,17 +75,18 @@ body{
 .restart_btn{
     display: none;
     background-color: white;
+    border-radius: 20px;
     font-size: 1.5rem;
     padding: 10px;
     border: 0px;
 }
 
-.incorrect_word{
+.incorrect_char{
     color: red;
     text-decoration: underline;
 }
 
-.correct_word{
+.correct_char{
     color: white;
     
 }

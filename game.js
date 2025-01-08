@@ -2,6 +2,8 @@ let TIME_LIMIT = 60;
 
 let quotes_array = [
   'Push yourself, because no one else is going to do it for you.',
+  'The coin hovered in the air, spinning over and over again. It reached its peak and began to descend. Both boys were pleading with it to land a certain way but the coin had already made up its mind on what it was going to do.',
+  'He collected the plastic trash on a daily basis. It never seemed to end. Even if he cleaned the entire beach, more plastic would cover it the next day after the tide had come in. Although it was a futile effort that would never be done, he continued to pick up the trash each day.',
   'Failure is the condiment that gives success its flavor.',
   'Wake up with determination. Go to bed with satisfaction.',
   "It's going to be hard, but hard does not mean impossible.",
@@ -32,96 +34,84 @@ let current_quote = '';
 let quoteNo = 0;
 let timer = null;
 
-// Keeps track of current word being typed
-let currentWordIndex = 0;
+document.addEventListener('DOMContentLoaded', () => {
+  resetValues();
+  input_area.addEventListener('focus', startGame);
+  input_area.addEventListener('input', processCurrentText);
+  restart_btn.addEventListener('click', startGame);
+});
 
-const updateQuote = () => {
+function updateQuote() {
   quote_text.textContent = null;
   current_quote = quotes_array[quoteNo];
 
-  // Separate each word and style them
-  current_quote.split(' ').forEach((word) => {
-    const wordSpan = document.createElement('span');
-    wordSpan.classList.add('word');
-    wordSpan.innerText = word + ' '; // Add space between words
-    quote_text.appendChild(wordSpan);
+  // separate each character and make an element
+  // out of each of them to individually style them
+  current_quote.split('').forEach((char) => {
+    const charSpan = document.createElement('span');
+    charSpan.innerText = char;
+    quote_text.appendChild(charSpan);
   });
 
-  // Reset word index
-  currentWordIndex = 0;
-
-  // go to the next quote
-  if (quoteNo < quotes_array.length - 1) quoteNo++;
   // roll over to the first quote
+  if (quoteNo < quotes_array.length - 1) quoteNo++;
   else quoteNo = 0;
-};
+}
 
-const processCurrentText = () => {
-  let curr_input = input_area.value.trim(); // Get the trimmed input text
-  let inputWords = curr_input.split(' '); // Split input into words
-  let quoteWords = current_quote.split(' '); // Split the quote into words
+function processCurrentText() {
+  // get current input text and split it
+  curr_input = input_area.value;
+  curr_input_array = curr_input.split('');
+
+  // increment total characters typed
+  characterTyped++;
 
   errors = 0;
 
-  // Get all word spans
-  let wordSpanArray = quote_text.querySelectorAll('.word');
+  quoteSpanArray = quote_text.querySelectorAll('span');
+  quoteSpanArray.forEach((char, index) => {
+    let typedChar = curr_input_array[index];
 
-  // Process all words in the quote
-  wordSpanArray.forEach((wordSpan, index) => {
-    let typedWord = inputWords[index] || ''; // Get the word typed by the user
+    // character not currently typed
+    if (typedChar == null) {
+      char.classList.remove('correct_char');
+      char.classList.remove('incorrect_char');
 
-    if (index < currentWordIndex) {
-      // Previous words
-      if (typedWord === quoteWords[index]) {
-        wordSpan.classList.add('correct_word');
-        wordSpan.classList.remove('incorrect_word');
-      } else {
-        wordSpan.classList.add('incorrect_word');
-        wordSpan.classList.remove('correct_word');
-        errors++;
-      }
-    } else if (index === currentWordIndex) {
-      // Current word being typed
-      if (quoteWords[index].startsWith(typedWord)) {
-        // Partially correct word
-        wordSpan.classList.remove('incorrect_word');
-      } else {
-        wordSpan.classList.add('incorrect_word');
-        errors++;
-      }
+      // correct character
+    } else if (typedChar === char.innerText) {
+      char.classList.add('correct_char');
+      char.classList.remove('incorrect_char');
+
+      // incorrect character
     } else {
-      // Future words
-      wordSpan.classList.remove('correct_word', 'incorrect_word');
+      char.classList.add('incorrect_char');
+      char.classList.remove('correct_char');
+
+      // increment number of errors
+      errors++;
     }
   });
 
-  // Update error count
+  // display the number of errors
   error_text.textContent = total_errors + errors;
 
-  // Update accuracy
+  // update accuracy text
   let correctCharacters = characterTyped - (total_errors + errors);
   let accuracyVal = (correctCharacters / characterTyped) * 100;
   accuracy_text.textContent = `%${Math.round(accuracyVal)}`;
 
-  // If the current word is fully typed and correct
-  if (
-    inputWords[currentWordIndex] === quoteWords[currentWordIndex] &&
-    curr_input.endsWith(' ')
-  ) {
-    currentWordIndex++; // Move to the next word
-    input_area.value = ''; // Clear the input area
+  // if current text is completely typed
+  // irrespective of errors
+  if (curr_input.length == current_quote.length) {
+    updateQuote();
 
-    // If the last word is typed, load the next quote
-    if (currentWordIndex === quoteWords.length) {
-      updateQuote();
-      total_errors += errors; // Update total errors
-      input_area.value = ''; // Clear input field
-    }
+    // update total errors
+    total_errors += errors;
+
+    // clear the input area
+    input_area.value = '';
   }
-
-  // Increment total characters typed
-  characterTyped++;
-};
+}
 
 const startGame = () => {
   resetValues();
@@ -150,4 +140,47 @@ const resetValues = () => {
   restart_btn.style.display = 'none';
   cpm_group.style.display = 'none';
   wpm_group.style.display = 'none';
+};
+
+const updateTimer = () => {
+  if (timeLeft > 0) {
+    // decrease the current time Left
+    timeLeft--;
+
+    // increase the time elapsed
+    timeElapsed++;
+
+    // update the timer text
+    timer_text.textContent = timeLeft + 's';
+  } else {
+    // finish the game
+    finishGame();
+  }
+};
+
+const finishGame = () => {
+  // stop the timer
+  clearInterval(timer);
+
+  // disable the input area
+  input_area.value = '';
+  input_area.disabled = true;
+
+  // show finishing text
+  quote_text.textContent = 'Click on restart to start new game.';
+
+  // display restart button
+  restart_btn.style.display = 'block';
+
+  // calculate cpm and wpm
+  cpm = Math.round((characterTyped / timeElapsed) * 60);
+  wpm = Math.round((characterTyped / 5 / timeElapsed) * 60);
+
+  // update cpm and wpm text
+  cpm_text.textContent = cpm;
+  wpm_text.textContent = wpm;
+
+  // display the cpm and wpm
+  cpm_group.style.display = 'block';
+  wpm_group.style.display = 'block';
 };
