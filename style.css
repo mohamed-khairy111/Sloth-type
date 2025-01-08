@@ -80,12 +80,12 @@ body{
     border: 0px;
 }
 
-.incorrect_char{
+.incorrect_word{
     color: red;
     text-decoration: underline;
 }
 
-.correct_char{
+.correct_word{
     color: white;
     
 }

@@ -50,8 +50,9 @@ const updateQuote = () => {
   // Reset word index
   currentWordIndex = 0;
 
-  // Roll over to the first quote
+  // go to the next quote
   if (quoteNo < quotes_array.length - 1) quoteNo++;
+  // roll over to the first quote
   else quoteNo = 0;
 };
 
@@ -100,7 +101,7 @@ const processCurrentText = () => {
   // Update accuracy
   let correctCharacters = characterTyped - (total_errors + errors);
   let accuracyVal = (correctCharacters / characterTyped) * 100;
-  accuracy_text.textContent = Math.round(accuracyVal);
+  accuracy_text.textContent = `%${Math.round(accuracyVal)}`;
 
   // If the current word is fully typed and correct
   if (
@@ -120,4 +121,33 @@ const processCurrentText = () => {
 
   // Increment total characters typed
   characterTyped++;
+};
+
+const startGame = () => {
+  resetValues();
+  updateQuote();
+
+  // clear old and start a new timer
+  clearInterval(timer);
+  timer = setInterval(updateTimer, 1000);
+};
+
+const resetValues = () => {
+  timeLeft = TIME_LIMIT;
+  timeElapsed = 0;
+  errors = 0;
+  total_errors = 0;
+  accuracy = 0;
+  characterTyped = 0;
+  quoteNo = 0;
+  input_area.disabled = false;
+
+  input_area.value = '';
+  quote_text.textContent = 'Click on the area below to start the game.';
+  accuracy_text.textContent = 100;
+  timer_text.textContent = timeLeft + 's';
+  error_text.textContent = 0;
+  restart_btn.style.display = 'none';
+  cpm_group.style.display = 'none';
+  wpm_group.style.display = 'none';
 };
